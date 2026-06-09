@@ -1,0 +1,173 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    /* 🎬 HIỆU ỨNG KÍNH MỜ VÀ ĐIỆN ẢNH CHO FORM */
+    .glass-card {
+        background: rgba(20, 20, 30, 0.6) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    /* Thẻ input phát sáng khi click */
+    .glow-input {
+        background-color: rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        color: #fff !important;
+        padding: 12px 16px;
+        border-radius: 10px !important;
+        transition: all 0.3s ease;
+    }
+    .glow-input:focus {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        border-color: #ff416c !important;
+        box-shadow: 0 0 12px rgba(255, 65, 108, 0.4) !important;
+    }
+    .glow-input::placeholder {
+        color: #77758f !important;
+    }
+
+    /* Group button con mắt ẩn/hiện mật khẩu */
+    .glow-input-btn {
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-left: none !important;
+        background-color: rgba(0, 0, 0, 0.3) !important;
+        color: #77758f !important;
+        border-radius: 0 10px 10px 0 !important;
+        transition: all 0.3s;
+    }
+    .glow-input:focus + .glow-input-btn, .glow-input-btn:hover {
+        color: #ff416c !important;
+        border-color: #ff416c !important;
+    }
+
+    /* Nút bấm Gradient */
+    .btn-gradient {
+        background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        border: none !important;
+        color: white !important;
+        font-weight: 600;
+        padding: 12px;
+        border-radius: 10px !important;
+        transition: all 0.3s ease;
+    }
+    .btn-gradient:hover:not(:disabled) {
+        box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4);
+        transform: translateY(-2px);
+        opacity: 0.95;
+    }
+    .btn-gradient:disabled {
+        background: #2a2a38 !important;
+        color: #666 !important;
+        border: 1px solid rgba(255,255,255,0.05) !important;
+    }
+</style>
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: 70vh;">
+    <div class="card glass-card p-4 w-100 shadow" style="max-width:420px;">
+        
+       {% if request.args.get('msg') == 'deleted' %}
+        <div class="alert alert-success text-center py-2 small mb-3 rounded-3" 
+            style="background-color: rgba(25, 135, 84, 0.2) !important; color: #75b798 !important; border: 1px solid #198754 !important;">
+            <i class="bi bi-check-circle-fill me-1"></i> Tài khoản đã được xóa thành công
+        </div>
+        {% elif request.args.get('msg') == 'registered' %}
+        <div class="alert alert-success text-center py-2 small mb-3 rounded-3" 
+            style="background-color: rgba(25, 135, 84, 0.2) !important; color: #75b798 !important; border: 1px solid #198754 !important;">
+            <i class="bi bi-check-circle-fill me-1"></i> Đăng ký thành công! Đăng nhập ngay.
+        </div>
+        {% endif %}
+
+        <h3 class="text-center mb-4 text-white fw-bold d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-shield-lock text-danger"></i> Đăng Nhập
+        </h3>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="mb-3">
+                <label class="small text-secondary mb-1 fw-medium">Email</label>
+                <input class="form-control glow-input" type="text" name="email" placeholder="Nhập email của bạn..." required {% if blocked %}disabled{% endif %}>
+            </div>
+            
+            <div class="mb-4">
+                <label class="small text-secondary mb-1 fw-medium">Mật khẩu</label>
+                <div class="input-group">
+                    <input id="password" 
+                           class="form-control glow-input" 
+                           type="password" 
+                           name="password" 
+                           placeholder="Nhập mật khẩu..." 
+                           style="border-radius: 10px 0 0 10px !important;"
+                           required
+                           {% if blocked %}disabled{% endif %}>
+                    
+                    <button type="button" class="btn glow-input-btn" onclick="togglePassword()" {% if blocked %}disabled{% endif %}>
+                        <i id="eye-icon" class="bi bi-eye"></i>
+                    </button>
+                </div>
+                <div class="text-center mt-2">
+                    <a href="{{ url_for('forgot_password') }}" class="text-danger text-decoration-none small fw-bold">
+                        Quên mật khẩu?
+                    </a>
+                </div>
+            </div>
+
+            <button class="btn btn-gradient w-100" id="btnLogin" {% if blocked %}disabled{% endif %}>
+                Đăng Nhập
+            </button>
+        </form>
+
+        {% if error %}
+        <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25 text-center py-2 font-weight-bold mt-3 text-danger small rounded-3">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-4 small text-secondary">
+            Chưa có tài khoản xem phim? 
+            <a href="{{ url_for('register') }}" class="text-danger text-decoration-none fw-bold ms-1">Đăng ký ngay</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    var x = document.getElementById("password");
+    var icon = document.getElementById("eye-icon");
+    
+    if (x.type === "password") {
+        x.type = "text";
+        icon.classList.remove("bi-eye");
+        icon.classList.add("bi-eye-slash");
+    } else {
+        x.type = "password";
+        icon.classList.remove("bi-eye-slash");
+        icon.classList.add("bi-eye");
+    }
+}
+</script>
+
+{% if blocked %}
+<script>
+let seconds = 60;
+const btn = document.getElementById("btnLogin");
+
+btn.innerText = "Thử lại sau " + seconds + "s";
+seconds--;
+
+const interval = setInterval(() => {
+    btn.innerText = "Thử lại sau " + seconds + "s";
+    seconds--;
+
+    if (seconds < 0) {
+        clearInterval(interval);
+        location.reload();
+    }
+}, 1000);
+</script>
+{% endif %}
+{% endblock %}

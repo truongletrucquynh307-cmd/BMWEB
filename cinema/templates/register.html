@@ -1,0 +1,184 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    /* 🎬 HIỆU ỨNG KÍNH MỜ VÀ ĐIỆN ẢNH CHO FORM */
+    .glass-card {
+        background: rgba(20, 20, 30, 0.6) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    /* Thẻ input phát sáng */
+    .glow-input {
+        background-color: rgba(0, 0, 0, 0.3) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        color: #fff !important;
+        padding: 12px 16px;
+        border-radius: 10px !important;
+        transition: all 0.3s ease;
+    }
+    .glow-input:focus {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        border-color: #28a745 !important;
+        box-shadow: 0 0 12px rgba(40, 167, 69, 0.4) !important;
+    }
+    .glow-input::placeholder {
+        color: #77758f !important;
+    }
+
+    /* Group button con mắt ẩn/hiện mật khẩu */
+    .glow-input-btn {
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-left: none !important;
+        background-color: rgba(0, 0, 0, 0.3) !important;
+        color: #77758f !important;
+        border-radius: 0 10px 10px 0 !important;
+        transition: all 0.3s;
+    }
+    .glow-input:focus + .glow-input-btn, .glow-input-btn:hover {
+        color: #28a745 !important;
+        border-color: #28a745 !important;
+    }
+
+    /* Khối quy định mật khẩu tinh tế */
+    .policy-box {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        padding: 12px;
+        border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    /* Custom Checkbox đồng bộ màu tối */
+    .custom-check {
+        cursor: pointer;
+    }
+    .custom-check:checked {
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+    }
+
+    /* Nút bấm Gradient Xanh lá */
+    .btn-gradient-success {
+        background: linear-gradient(45deg, #11998e, #38ef7d);
+        border: none !important;
+        color: white !important;
+        font-weight: 600;
+        padding: 12px;
+        border-radius: 10px !important;
+        transition: all 0.3s ease;
+    }
+    .btn-gradient-success:hover {
+        box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);
+        transform: translateY(-2px);
+        opacity: 0.95;
+    }
+</style>
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="card glass-card p-4 w-100 shadow" style="max-width:440px;">
+        <h3 class="text-center mb-4 text-white fw-bold d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-person-plus text-success"></i> Đăng Ký
+        </h3>
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <div class="mb-3">
+                <label class="small text-secondary mb-1 fw-medium">Email</label>
+                <input class="form-control glow-input" type="email" name="email" placeholder="Ví dụ: điệnảnh@gmail.com" required>
+            </div>
+            
+            <div class="mb-3">
+                <label class="small text-secondary mb-1 fw-medium">Mật khẩu bảo mật</label>
+                <div class="input-group">
+                    <input id="password" 
+                           class="form-control glow-input" 
+                           type="password" 
+                           name="password" 
+                           placeholder="Tạo mật khẩu an toàn..."
+                           style="border-radius: 10px 0 0 10px !important;"
+                           required 
+                           pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()]).{8,}" 
+                           title="Ít nhất 8 ký tự, có chữ hoa, thường, số và ký tự đặc biệt">
+                           
+                    <button type="button" class="btn glow-input-btn" onclick="togglePassword()">
+                       <i id="eye-icon" class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-3 policy-box">
+                <small class="text-muted d-block mb-1 fw-semibold text-uppercase" style="font-size: 10px; letter-spacing: 0.5px;">
+                    <i class="bi bi-info-circle me-1 text-info"></i> Tiêu chuẩn mật khẩu:
+                </small>
+                <ul class="mb-0 text-secondary ps-3 small" style="font-size: 12px; line-height: 1.6;">
+                    <li>Độ dài tối thiểu từ <strong>8 ký tự</strong> trở lên</li>
+                    <li>Chứa ít nhất <strong>1 chữ HOA</strong> & <strong>1 chữ thường</strong></li>
+                    <li>Bao gồm ít nhất <strong>1 chữ số</strong> và <strong>1 ký tự đặc biệt</strong></li>
+                </ul>
+            </div>
+
+            <div class="form-check mb-4 align-items-center">
+                <input class="form-check-input custom-check" type="checkbox" id="promoEmail" style="background-color: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.2);">
+                <label class="form-check-label text-secondary small user-select-none custom-check" for="promoEmail">
+                    Đồng ý nhận thông tin phim hot và ưu đãi qua Email
+                </label>
+            </div>
+
+            <div class="form-check mt-3 mb-4">
+                <input 
+                    class="form-check-input custom-check" 
+                    type="checkbox" 
+                    id="agreeTerms"
+                    name="agree_terms"
+                    style="background-color: rgba(0,0,0,0.4); border-color: rgba(255,255,255,0.2);"
+                    required
+                    oninvalid="this.setCustomValidity('Bạn vui lòng tích chọn đồng ý với điều khoản để tiếp tục!')"
+                    oninput="this.setCustomValidity('')"
+                >
+                <label class="form-check-label text-secondary small user-select-none" for="agreeTerms">
+                    Bằng việc đăng ký, tôi đồng ý với 
+                    <a href="{{ url_for('privacy') }}" class="text-info text-decoration-none fw-semibold">Chính sách bảo mật</a>
+                    và 
+                    <a href="#" class="text-info text-decoration-none fw-semibold">Điều khoản dịch vụ</a>
+                    của hệ thống.
+                </label>
+            </div>
+
+            <button class="btn btn-gradient-success w-100">Tạo Tài Khoản</button>
+        </form>
+
+        {% if error %}
+            <div class="alert alert-danger bg-danger bg-opacity-10 border-danger border-opacity-25 text-center py-2 text-danger small mt-3 rounded-3 fw-bold">
+                ⚠️ {{error}}
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-4 small text-secondary">
+            Đã có tài khoản thành viên?
+            <a href="{{ url_for('login') }}" class="text-success text-decoration-none fw-bold ms-1">Đăng nhập</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword() {
+    var x = document.getElementById("password");
+    var icon = document.getElementById("eye-icon");
+    
+    if (x.type === "password") {
+        x.type = "text";
+        icon.classList.remove("bi-eye");
+        icon.classList.add("bi-eye-slash");
+    } else {
+        x.type = "password";
+        icon.classList.remove("bi-eye-slash");
+        icon.classList.add("bi-eye");
+    }
+}
+</script>
+{% endblock %}

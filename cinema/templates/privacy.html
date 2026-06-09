@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    /* Nút Menu (Giữ nguyên vị trí và phong cách) */
+    .menu-btn {
+        position: fixed; top: 20px; right: 20px; z-index: 1040;
+        background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.1); 
+        color: white; padding: 10px 16px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(5px);
+    }
+    .menu-btn:hover { background: rgba(255, 65, 108, 0.3); }
+
+    /* Container mới đồng bộ giao diện Dark Mode */
+    .privacy-box {
+        background: rgba(26, 26, 38, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 28px !important;
+        backdrop-filter: blur(20px);
+        padding: 50px !important;
+        color: #e0e0e0;
+        max-width: 800px;
+        margin: 100px auto 50px auto;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* Định dạng văn bản cho Dark Mode */
+    .privacy-box h3 { color: #ff416c !important; font-weight: 800; }
+    .privacy-box h5 { color: #fff; margin-top: 30px; font-weight: 600; }
+    .privacy-box hr { border-top: 1px solid rgba(255, 255, 255, 0.1); }
+    .privacy-box a { color: #ff416c !important; text-decoration: none; }
+    .btn-custom { border: 1px solid #ff416c; color: #ff416c; border-radius: 10px; padding: 8px 20px; transition: 0.3s; }
+    .btn-custom:hover { background: #ff416c; color: white; }
+
+    /* Offcanvas */
+    .offcanvas { background: #1a1a26 !important; color: white !important; z-index: 1060 !important; }
+    .nav-link { color: #ccc !important; padding: 15px 20px !important; }
+    .nav-link:hover { background: rgba(255, 65, 108, 0.2); color: #ff416c !important; }
+    .offcanvas-header { display: flex !important; justify-content: space-between !important; align-items: center !important; padding: 1.5rem !important; }
+</style>
+
+<button class="menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainMenu">
+    <i class="bi bi-list fs-4"></i>
+</button>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="mainMenu">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title fw-bold text-white m-0">Menu</h5>
+        <button type="button" class="btn p-0 text-white" data-bs-dismiss="offcanvas" style="font-size: 1.5rem;">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}"><i class="bi bi-house me-2"></i> Trang chủ</a></li>
+            <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2 fw-semibold"
+                    href="{{ url_for('account') }}">
+
+                    <i class="bi bi-person-fill-gear"></i>
+                    Tài khoản
+                    </a>
+                </li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('tickets') }}"><i class="bi bi-ticket-perforated me-2"></i> Vé của tôi</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('privacy') }}"><i class="bi bi-shield-check me-2"></i> Chính sách bảo mật</a></li>
+            <hr class="text-secondary">
+            <li class="nav-item">
+                <a class="nav-link text-danger" href="{{ url_for('logout') }}" 
+                onclick="return confirm('Bạn có chắc chắn muốn đăng xuất không?');">
+                    <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                </a>
+            </li>           
+            <li class="nav-item">
+                <a class="nav-link text-danger" href="{{ url_for('delete') }}" onclick="return confirm('Bạn chắc chắn muốn xóa tài khoản?')">
+                    <i class="bi bi-trash me-2"></i> Xóa tài khoản
+                </a>
+            </li>              
+        </ul>
+    </div>
+</div>
+
+<div class="card privacy-box shadow-sm">
+    <h3 class="text-primary">🔐 Chính sách quyền riêng tư</h3>
+    <p class="text-secondary"><i>Cập nhật lần cuối: 05/05/2026</i></p>
+    <hr>
+
+    <h5>1. Thông tin thu thập</h5>
+    <p>Hệ thống chỉ thu thập các thông tin cần thiết bao gồm:
+        <ul>
+            <li>Email người dùng</li>
+            <li>Mật khẩu (đã được mã hóa qua thuật toán bảo mật)</li>
+            <li>Thông tin đặt vé (phim, rạp, ngày, giờ, giá)</li>
+        </ul>
+    </p>
+
+    <h5>2. Mục đích sử dụng</h5>
+    <p>Thông tin được sử dụng nhằm:
+        <ul>
+            <li>Xác thực và bảo mật tài khoản người dùng</li>
+            <li>Quản lý và hiển thị lịch sử hoạt động đặt vé</li>
+            <li>Cải thiện hiệu năng và trải nghiệm hệ thống</li>
+        </ul>
+    </p>
+
+    <h5>3. Bảo mật dữ liệu</h5>
+    <p>Mật khẩu người dùng được mã hóa bằng thuật toán <strong>bcrypt</strong>, đảm bảo tính ẩn danh và an toàn tuyệt đối.</p>
+
+    <h5>4. Quyền của người dùng</h5>
+    <p>Người dùng có toàn quyền chủ động đối với dữ liệu cá nhân:
+        <ul>
+            <li>Truy cập và xem thông tin cá nhân bất kỳ lúc nào</li>
+            <li>Quyền được "lãng quên": Xóa tài khoản và toàn bộ dữ liệu liên quan khỏi hệ thống vĩnh viễn</li>
+        </ul>
+    </p>
+
+    <h5>5. Nguyên tắc Privacy by Design</h5>
+    <p>Hệ thống tuân thủ nghiêm ngặt các nguyên tắc của Ann Cavoukian:
+        <ul>
+            <li><strong>Giảm thiểu dữ liệu:</strong> Chỉ thu thập những gì thật sự cần thiết</li>
+            <li><strong>Bảo mật mặc định:</strong> Dữ liệu được bảo vệ ngay từ khi hệ thống bắt đầu vận hành</li>
+            <li><strong>Minh bạch:</strong> Quy trình xử lý dữ liệu luôn rõ ràng với người dùng</li>
+        </ul>
+    </p>
+
+    <h5>6. Cookies và phiên đăng nhập</h5>
+    <p>Hệ thống sử dụng <strong>session</strong> để duy trì trạng thái đăng nhập. Chúng tôi cam kết không sử dụng cookie theo dõi của bên thứ ba.</p>
+
+    <h5>7. Vòng đời dữ liệu</h5>
+    <p>Dữ liệu người dùng được lưu trữ trong hệ thống nhằm phục vụ chức năng đăng nhập và đặt vé cho đến khi người dùng chủ động xóa tài khoản.</p>
+
+    <h5>8. Cam kết</h5>
+    <p>Chúng tôi cam kết không chia sẻ, bán hoặc trao đổi thông tin người dùng cho bất kỳ bên thứ ba nào. Mọi dữ liệu chỉ phục vụ cho mục đích vận hành nội bộ.</p>
+
+    <h5>9. Liên hệ</h5>
+    <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ đội ngũ quản trị tại: 
+        <a href="mailto:support@example.com">support@example.com</a>
+    </p>
+
+    <div class="mt-4 text-center">
+        <a href="{{ url_for('home') }}" class="btn btn-custom">Quay lại Trang chủ</a>
+    </div>
+</div>
+{% endblock %}

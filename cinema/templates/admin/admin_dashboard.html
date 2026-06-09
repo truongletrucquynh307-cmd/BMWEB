@@ -1,0 +1,353 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    /* Nút Menu Hamburger */
+    .menu-btn {
+        position: fixed; top: 20px; right: 20px; z-index: 1050;
+        background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.1); 
+        color: white; padding: 10px 16px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(5px);
+    }
+    .menu-btn:hover { background: rgba(255, 65, 108, 0.3); }
+
+    /* Offcanvas Dark Mode đồng bộ */
+    .offcanvas { 
+        background: #1a1a26 !important; 
+        color: white !important; 
+        z-index: 1060 !important; 
+    }
+    .offcanvas-title { color: white !important; font-weight: bold; }
+    .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+    
+    .nav-link { 
+        color: #ccc !important; 
+        padding: 15px 20px !important; 
+        transition: 0.3s;
+    }
+    .nav-link:hover { 
+        background: rgba(255, 65, 108, 0.2); 
+        color: #ff416c !important; 
+    }
+    .offcanvas-header { 
+        display: flex !important; 
+        justify-content: space-between !important; 
+        align-items: center !important; 
+        padding: 1.5rem !important; 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    hr { border-top: 1px solid rgba(255, 255, 255, 0.1); }
+
+    body {
+        background: #0f0f1c;
+        color: #f1f1f7;
+    }
+
+    .admin-wrapper {
+        background: rgba(20, 20, 30, 0.7);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 24px;
+    }
+
+    .dashboard-card {
+        background: linear-gradient(145deg, #1c1c2b, #11111b);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 20px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        border-color: rgba(255,65,108,0.3);
+    }
+
+    .dashboard-icon {
+        width: 65px;
+        height: 65px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 18px;
+    }
+
+    .icon-movie {
+        background: rgba(255, 65, 108, 0.15);
+        color: #ff416c;
+    }
+
+    .icon-showtime {
+        background: rgba(0, 186, 198, 0.15);
+        color: #00bac6;
+    }
+
+    .icon-user {
+        background: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+    }
+
+    .icon-booking {
+        background: rgba(40, 167, 69, 0.15);
+        color: #28a745;
+    }
+
+    .icon-security {
+        background: rgba(111, 66, 193, 0.15);
+        color: #b892ff;
+    }
+
+    .admin-btn {
+        background: linear-gradient(45deg, #ff416c, #ff4b2b);
+        border: none;
+        color: white;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .admin-btn:hover {
+        opacity: 0.9;
+        transform: scale(1.03);
+        color: white;
+    }
+
+    .stats-box {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 18px;
+    }
+</style>
+
+<button class="menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminMenu">
+    <i class="bi bi-list fs-4"></i>
+</button>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="adminMenu">
+    <div class="offcanvas-header border-bottom border-secondary">
+        <h5 class="offcanvas-title text-white">Menu Quản trị</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+            <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2 fw-semibold"
+                    href="{{ url_for('account') }}">
+
+                    <i class="bi bi-person-fill-gear"></i>
+                    Tài khoản
+                    </a>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_movies') }}"><i class="bi bi-film me-2"></i> Phim</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_showtimes') }}"><i class="bi bi-calendar-event me-2"></i> Suất chiếu</a></li>
+            {% if session.role == 'admin_system' %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_users') }}">
+                    <i class="bi bi-people me-2"></i> Người dùng
+                </a>
+            </li>
+            {% endif %}            
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_bookings') }}"><i class="bi bi-ticket-perforated me-2"></i> Giao dịch vé</a></li>
+            
+            {% if session.role == 'admin_system' %}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('admin_logs') }}">
+                    <i class="bi bi-terminal me-2"></i> Log hệ thống
+                </a>
+            </li>
+            {% endif %}
+            <hr class="text-secondary">
+            <li class="nav-item">
+                <a class="nav-link text-danger" href="{{ url_for('logout') }}" onclick="return confirm('Đăng xuất khỏi hệ thống?');">
+                    <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="container py-5">
+
+    <div class="admin-wrapper p-4 p-md-5 shadow-lg">
+
+        <!-- HEADER -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-5 border-bottom border-white border-opacity-10 pb-4">
+            <div>
+                <h2 class="fw-black text-white mb-1">
+                    <i class="bi bi-speedometer2 text-danger me-2"></i>
+                    ADMIN DASHBOARD
+                </h2>
+
+                <p class="text-secondary m-0">
+                    Hệ thống quản trị rạp chiếu phim
+                </p>
+            </div>
+
+            <span class="badge bg-danger px-3 py-2 rounded-pill mt-3 mt-md-0">
+                Administrator
+            </span>
+        </div>
+
+        <!-- STATS -->
+        {% if session.role == 'admin_system' %}
+        <div class="stats-box p-4 mb-5">
+            <div class="row text-center">
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h2 class="fw-black text-info">{{ user_count }}</h2>
+                    <p class="text-secondary m-0">Người dùng</p>
+                </div>
+
+                <div class="col-md-4 mb-3 mb-md-0">
+                    <h2 class="fw-black text-warning">{{ booking_count }}</h2>
+                    <p class="text-secondary m-0">Lượt đặt vé</p>
+                </div>
+
+                <div class="col-md-4">
+                    <h2 class="fw-black text-success">{{ movie_count }}</h2>
+                    <p class="text-secondary m-0">Phim hiện có</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- MENU -->
+        <div class="row g-4">
+
+            <!-- MOVIES -->
+            <div class="col-lg-4 col-md-6">
+                <div class="dashboard-card h-100 p-4">
+                    <div class="dashboard-icon icon-movie">
+                        <i class="bi bi-film"></i>
+                    </div>
+
+                    <h4 class="fw-bold text-white">
+                        Quản lý phim
+                    </h4>
+
+                    <p class="text-secondary small">
+                        Thêm, sửa, xóa phim và poster điện ảnh.
+                    </p>
+
+                    <a href="{{ url_for('admin_movies') }}" 
+                       class="admin-btn mt-2">
+
+                        <i class="bi bi-arrow-right"></i>
+                        Truy cập
+                    </a>
+                </div>
+            </div>
+
+            <!-- SHOWTIMES -->
+            <div class="col-lg-4 col-md-6">
+                <div class="dashboard-card h-100 p-4">
+                    <div class="dashboard-icon icon-showtime">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+
+                    <h4 class="fw-bold text-white">
+                        Quản lý suất chiếu
+                    </h4>
+
+                    <p class="text-secondary small">
+                        Quản lý ngày chiếu, giờ chiếu và phòng chiếu.
+                    </p>
+
+                    <a href="{{ url_for('admin_showtimes') }}"
+                       class="admin-btn mt-2">
+
+                        <i class="bi bi-arrow-right"></i>
+                        Truy cập
+                    </a>
+                </div>
+            </div>
+
+            <!-- USERS -->
+            {% if session.role == 'admin_system' %}
+            <div class="col-lg-4 col-md-6">
+                <div class="dashboard-card h-100 p-4">
+                    <div class="dashboard-icon icon-user">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+
+                    <h4 class="fw-bold text-white">
+                        Quản lý người dùng
+                    </h4>
+
+                    <p class="text-secondary small">
+                        Xem danh sách user và phân quyền tài khoản.
+                    </p>
+
+                    <a href="{{ url_for('admin_users') }}"
+                       class="admin-btn mt-2">
+
+                        <i class="bi bi-arrow-right"></i>
+                        Truy cập
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- BOOKINGS -->
+            <div class="col-lg-4 col-md-6">
+                <div class="dashboard-card h-100 p-4">
+                    <div class="dashboard-icon icon-booking">
+                        <i class="bi bi-ticket-perforated-fill"></i>
+                    </div>
+
+                    <h4 class="fw-bold text-white">
+                        Quản lý đặt vé
+                    </h4>
+
+                    <p class="text-secondary small">
+                        Theo dõi giao dịch và lịch sử đặt vé.
+                    </p>
+
+                    <a href="{{ url_for('admin_bookings') }}"
+                       class="admin-btn mt-2">
+
+                        <i class="bi bi-arrow-right"></i>
+                        Truy cập
+                    </a>
+                </div>
+            </div>
+
+            <!-- SECURITY -->
+            {% if session.role == 'admin_system' %}
+            <div class="col-lg-4 col-md-6">
+                <div class="dashboard-card h-100 p-4">
+                    <div class="dashboard-icon icon-security">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+
+                    <h4 class="fw-bold text-white">
+                        Security Logs
+                    </h4>
+
+                    <p class="text-secondary small">
+                        Nhật ký hoạt động và bảo mật hệ thống.
+                    </p>
+
+                    <a href="{{ url_for('admin_logs') }}"
+                       class="admin-btn mt-2">
+
+                        <i class="bi bi-arrow-right"></i>
+                        Truy cập
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

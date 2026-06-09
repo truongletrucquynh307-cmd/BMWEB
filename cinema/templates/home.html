@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    /* Nút Hamburger (Chỉ hiện khi đã đăng nhập) */
+    .menu-btn {
+        position: fixed; top: 20px; right: 20px; z-index: 1040;
+        background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.1); 
+        color: white; padding: 10px 16px; border-radius: 12px; cursor: pointer; backdrop-filter: blur(5px);
+    }
+    .menu-btn:hover { background: rgba(255, 65, 108, 0.3); }
+
+    /* Nút Đăng nhập/Đăng ký cố định (Khi chưa đăng nhập) */
+    .auth-btns {
+        position: fixed; top: 20px; right: 20px; z-index: 1040;
+        display: flex; gap: 10px;
+    }
+    .btn-auth {
+        background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.1);
+        color: white; padding: 8px 16px; border-radius: 12px; text-decoration: none; backdrop-filter: blur(5px);
+    }
+    .btn-auth:hover { background: #ff416c; color: white; }
+
+    /* 2. Fix lỗi icon đè lên nhau */
+    .offcanvas { 
+        background: #1a1a26 !important; 
+        color: white !important; 
+        z-index: 1060 !important; /* Đảm bảo offcanvas luôn nằm trên cùng */
+    }
+
+    .offcanvas-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        position: relative !important;
+    }
+
+    /* Đảm bảo nút close trong menu hoạt động bình thường */
+    .offcanvas-header .btn-close {
+        position: relative !important;
+        z-index: 1;
+        margin: 0 !important;
+        filter: invert(1) grayscale(100%) brightness(200%); /* Làm nút đóng sáng lên trên nền tối */
+    }
+
+    /* Các phần còn lại giữ nguyên */
+    .nav-link { color: #ccc !important; transition: 0.3s; padding: 15px 20px !important; font-weight: 500; }
+    .nav-link:hover { background: rgba(255, 65, 108, 0.2); color: #ff416c !important; }
+    .hero-banner { background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(15,15,28,1) 100%), url("{{ url_for('static', filename='images/banner.jpg') }}"); background-size: cover; background-position: center; border-radius: 20px; padding: 80px 40px; margin-bottom: 45px; }
+    .movie-card { background: rgba(26, 26, 38, 0.6) !important; border-radius: 20px !important; overflow: hidden; transition: 0.4s; }
+    .movie-card:hover { transform: translateY(-8px); border: 1px solid #ff416c; }
+    .poster-wrapper { position: relative; padding-top: 140%; overflow: hidden; }
+    .poster-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+    .rating-badge { position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,0.8); color: #ffc107; padding: 5px 12px; border-radius: 10px; font-weight: 800; }
+    .showtime-pill { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 8px 16px; border-radius: 10px; text-decoration: none; display: inline-block; margin: 4px; }
+    .showtime-pill:hover { background: #ff416c; border-color: #ff416c; }
+</style>
+
+{% if 'user_id' in session %}
+    <button class="menu-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainMenu">
+        <i class="bi bi-list fs-4"></i>
+    </button>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="mainMenu">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <h5 class="offcanvas-title">Menu</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="nav flex-column">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}"><i class="bi bi-house me-2"></i> Trang chủ</a></li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2 fw-semibold"
+                    href="{{ url_for('account') }}">
+
+                    <i class="bi bi-person-fill-gear"></i>
+                    Tài khoản
+                    </a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('tickets') }}"><i class="bi bi-ticket-perforated me-2"></i> Vé của tôi</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('privacy') }}"><i class="bi bi-shield-check me-2"></i> Chính sách bảo mật</a></li>
+                <hr class="text-secondary">
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="{{ url_for('logout') }}" onclick="return confirm('Bạn có chắc chắn muốn đăng xuất không?');">
+                        <i class="bi bi-box-arrow-right me-2"></i> Đăng xuất
+                    </a>
+                </li>           
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="{{ url_for('delete') }}" onclick="return confirm('Bạn chắc chắn muốn xóa tài khoản?')">
+                        <i class="bi bi-trash me-2"></i> Xóa tài khoản
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+{% else %}
+    <div class="auth-btns">
+        <a href="{{ url_for('login') }}" class="btn-auth"><i class="bi bi-box-arrow-in-right me-2"></i> Đăng nhập</a>
+        <a href="{{ url_for('register') }}" class="btn-auth"><i class="bi bi-person-plus me-2"></i> Đăng ký</a>
+    </div>
+{% endif %}
+
+<div class="container mt-5">
+    <div class="hero-banner text-start">
+        <h1 class="display-4 fw-black text-white">Thế Giới Điện Ảnh</h1>
+        <p class="text-secondary lead">Trải nghiệm đặt vé trực tuyến siêu tốc.</p>
+    </div>
+
+    <h3 class="mb-4 text-white">Phim Đang Chiếu</h3>
+    <div class="row g-4 mb-5">
+        {% for m in movies %}
+        <div class="col-xl-4 col-md-6">
+            <div class="card movie-card h-100 shadow">
+                <div class="poster-wrapper">
+                   <img src="{{ url_for('static', filename='posters/' ~ m.poster) }}" class="poster-img" alt="{{ m.title }}">
+                    <span class="rating-badge">⭐ {{ m.rating }}</span>
+                </div>
+                <div class="card-body p-4">
+                    <h4 class="text-white fw-bold">{{ m.title }}</h4>
+                    <p class="text-muted small">{{ m.genre }} • {{ m.duration }} phút</p>
+                    <div class="mt-3">
+                        {% for s in m.showtimes %}
+                            <a href="{{ url_for('book', showtime_id=s.id) }}" class="showtime-pill">{{ s.time }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
